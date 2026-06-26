@@ -1,0 +1,38 @@
+title: PsExec Service Installation
+id: 67359e27-96be-4ea8-ae92-fa9da6ca3c9f
+status: experimental
+description: >
+  Detects the service that PsExec installs on a remote host to run commands,
+  which is a very common lateral movement technique once an attacker has
+  credentials. Built on Windows System Event ID 7045 (a new service was
+  installed). The default PsExec service name and binary path are distinctive.
+references:
+  - https://attack.mitre.org/techniques/T1021/002/
+  - https://attack.mitre.org/techniques/T1569/002/
+author: Ismail Masoumabadi
+date: 2026/06/26
+tags:
+  - attack.lateral_movement
+  - attack.t1021.002
+  - attack.execution
+  - attack.t1569.002
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+  selection_name:
+    ServiceName|contains:
+      - 'PSEXESVC'
+      - 'PAExec'
+      - 'RemCom'
+  selection_path:
+    ImagePath|contains:
+      - '\PSEXESVC'
+      - '-service'
+  condition: selection and (selection_name or selection_path)
+falsepositives:
+  - Administrators who legitimately use PsExec for remote management
+  - Allowlist known admin hosts and accounts to cut the noise
+level: high

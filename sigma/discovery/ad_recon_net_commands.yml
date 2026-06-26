@@ -1,0 +1,43 @@
+title: Active Directory Reconnaissance via Net Commands
+id: 2db1ec58-c6c7-4b6c-9639-9a1c70c9ae25
+status: experimental
+description: >
+  Detects built in Windows commands used to enumerate domain users, groups and
+  high value targets like Domain Admins. This is the kind of quiet living off the
+  land recon an attacker runs early after landing on a host, before moving
+  laterally. Built on process creation telemetry.
+references:
+  - https://attack.mitre.org/techniques/T1087/002/
+  - https://attack.mitre.org/techniques/T1069/002/
+author: Ismail Masoumabadi
+date: 2026/06/26
+tags:
+  - attack.discovery
+  - attack.t1087.002
+  - attack.t1069.002
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_net:
+    Image|endswith:
+      - '\net.exe'
+      - '\net1.exe'
+    CommandLine|contains:
+      - 'group "domain admins"'
+      - 'group "enterprise admins"'
+      - 'user /domain'
+      - 'group /domain'
+      - 'accounts /domain'
+  selection_tools:
+    Image|endswith:
+      - '\nltest.exe'
+      - '\dsquery.exe'
+    CommandLine|contains:
+      - '/domain_trusts'
+      - 'domainlist'
+  condition: 1 of selection_*
+falsepositives:
+  - Help desk and admin scripts that enumerate group membership
+  - Asset and identity management tooling
+level: medium

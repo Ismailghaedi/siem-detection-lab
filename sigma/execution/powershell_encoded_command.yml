@@ -1,0 +1,37 @@
+title: Encoded PowerShell Command Execution
+id: 4ebf5062-9bd9-4295-96c1-115e1c051153
+status: experimental
+description: >
+  Detects PowerShell launched with an encoded command argument. Encoding the
+  command is a common way to hide intent and slip a payload past simple string
+  matching, so it shows up constantly in droppers and post exploitation. Built
+  on process creation telemetry (Sysmon Event ID 1 or Security 4688).
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+  - https://attack.mitre.org/techniques/T1027/
+author: Ismail Masoumabadi
+date: 2026/06/26
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.defense_evasion
+  - attack.t1027
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_flag:
+    CommandLine|contains:
+      - ' -enc '
+      - ' -encodedcommand'
+      - ' -ec '
+      - ' -e '
+  condition: selection_img and selection_flag
+falsepositives:
+  - A small number of legitimate management scripts and installers use encoded commands
+  - Tune by allowlisting known good parent processes or script paths
+level: medium

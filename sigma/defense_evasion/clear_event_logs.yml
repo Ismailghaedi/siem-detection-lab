@@ -1,0 +1,32 @@
+title: Windows Event Log Cleared
+id: 45ae1ebc-db65-468c-8248-36ced38acae5
+status: stable
+description: >
+  Detects the security event log being cleared, either through the dedicated
+  Event ID 1102 that Windows raises, or through the command line tools an attacker
+  uses to do it. Clearing logs is a classic anti forensics move to cover tracks
+  after an intrusion, so on most networks this should be rare and worth an alert.
+references:
+  - https://attack.mitre.org/techniques/T1070/001/
+author: Ismail Masoumabadi
+date: 2026/06/26
+tags:
+  - attack.defense_evasion
+  - attack.t1070.001
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_event:
+    EventID: 1102
+  selection_cmd:
+    CommandLine|contains:
+      - 'wevtutil cl'
+      - 'wevtutil clear-log'
+      - 'Clear-EventLog'
+      - 'Remove-EventLog'
+  condition: 1 of selection_*
+falsepositives:
+  - Rare planned maintenance where an admin deliberately clears a log
+  - Should be treated as suspicious until proven otherwise
+level: high

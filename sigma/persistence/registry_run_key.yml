@@ -1,0 +1,33 @@
+title: Registry Run Key Persistence
+id: 2d6cd654-66c6-4fab-877a-dcc40eccfb0c
+status: experimental
+description: >
+  Detects a new value written to one of the classic Run or RunOnce registry keys,
+  which is one of the oldest and most common ways malware survives a reboot. Built
+  on Sysmon Event ID 13 (RegistryValueSet). Worth pairing with a check on the
+  process doing the writing.
+references:
+  - https://attack.mitre.org/techniques/T1547/001/
+author: Ismail Masoumabadi
+date: 2026/06/26
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  category: registry_set
+  product: windows
+detection:
+  selection:
+    TargetObject|contains:
+      - '\Software\Microsoft\Windows\CurrentVersion\Run\'
+      - '\Software\Microsoft\Windows\CurrentVersion\RunOnce\'
+      - '\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run\'
+  filter_known_good:
+    Image|endswith:
+      - '\OneDriveSetup.exe'
+      - '\msiexec.exe'
+  condition: selection and not filter_known_good
+falsepositives:
+  - Legitimate software adding itself to startup during install
+  - Build the allowlist out as you learn your own environment
+level: medium
